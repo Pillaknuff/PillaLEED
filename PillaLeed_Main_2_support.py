@@ -24,10 +24,10 @@ from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
 import matplotlib.animation as animation
-import Camera_Communication as myCamlib
+import Spinnaker_driver as myCamlib
 from pathlib import Path
 
-saveDirectory = 'C:\\Users\\Philipp\\Desktop\\temp'
+saveDirectory = 'C:\\Users\\MBEcontrol\\Documents\\Measurements\\PillaLEED'
 
 
 def main(*args):
@@ -57,7 +57,7 @@ def main(*args):
     global myCamera, myLEED, running, LEEDOptions
     #************Initialize the Camera***************************************************
     global camMode # we define the cam Modes "whitenoise","live","static"
-    myCamera = myCamlib.myCamera('comx')
+    myCamera = myCamlib.myCamera(0)
     error = myCamera.connect()
     if not error:
         camMode = 1

@@ -3,7 +3,7 @@ import cv2
 class myCamera:
     def __init__(self,com):
         print("connecting to a camera")
-        self.cam = cv2.VideoCapture(0)
+        self.cam = cv2.VideoCapture(6)
     def connect(self):
         return False
 
