@@ -5,6 +5,7 @@
 #  in conjunction with Tcl version 8.6
 #    Apr 05, 2022 04:38:46 PM CEST  platform: Windows NT
 #
+from pyexpat import error
 import sys
 import tkinter as tk
 import tkinter.ttk as ttk
@@ -134,8 +135,36 @@ def updateGraphics(fig):
 def BackgroundUpdate():
     while running:
         time.sleep(1)
+        attrdict, error = myLEED.getAllAttributes()
+        if not error:
+            ChangeAStatus('LEED','connected','coolgreen')
+            for i,key in enumerate(LEEDOptions.keys()):
+                if key in attrdict.keys():
+                    val = attrdict[key]
+                    outstring = str(val) + ' ' + LEEDOptions[key][3] # unit
+                    ValueDisplayFields[i].configure(text=outstring)
+        else:
+            ChangeAStatus('LEED','disconnected','darkred')
+
         #print("aiaiaiai")
 
+def ChangeAValue(valno):
+    error = False
+    if valno < len(LEEDOptions.keys()):
+        valname = LEEDOptions.keys()[0]
+        value = ValueEntryFields[valno].get()
+        value = value.replace(',','.')
+    else:
+        error = True
+    try: 
+        value = float(value)
+    except Exception as e:
+        print('error changing value ' + str(valno) + ' ' + str(e))
+        error = True
+
+    if not error:
+        myLEED.setAttribute(valname,value)
+    
 
 
 def ChangeAStatus(what,whatto,color):
@@ -317,72 +346,84 @@ def set1(*args):
     for arg in args:
         print ('another arg:', arg)
     sys.stdout.flush()
+    ChangeAValue(0)
 
 def set10(*args):
     print('PillaLeed_Main_2_support.set10')
     for arg in args:
         print ('another arg:', arg)
     sys.stdout.flush()
+    ChangeAValue(9)
 
 def set11(*args):
     print('PillaLeed_Main_2_support.set11')
     for arg in args:
         print ('another arg:', arg)
     sys.stdout.flush()
+    ChangeAValue(10)
 
 def set12(*args):
     print('PillaLeed_Main_2_support.set12')
     for arg in args:
         print ('another arg:', arg)
     sys.stdout.flush()
+    ChangeAValue(11)
 
 def set2(*args):
     print('PillaLeed_Main_2_support.set2')
     for arg in args:
         print ('another arg:', arg)
     sys.stdout.flush()
+    ChangeAValue(1)
 
 def set3(*args):
     print('PillaLeed_Main_2_support.set3')
     for arg in args:
         print ('another arg:', arg)
     sys.stdout.flush()
+    ChangeAValue(2)
 
 def set4(*args):
     print('PillaLeed_Main_2_support.set4')
     for arg in args:
         print ('another arg:', arg)
     sys.stdout.flush()
+    ChangeAValue(3)
 
 def set5(*args):
     print('PillaLeed_Main_2_support.set5')
     for arg in args:
         print ('another arg:', arg)
     sys.stdout.flush()
+    ChangeAValue(4)
 
 def set6(*args):
     print('PillaLeed_Main_2_support.set6')
     for arg in args:
         print ('another arg:', arg)
     sys.stdout.flush()
+    ChangeAValue(5)
 
 def set7(*args):
     print('PillaLeed_Main_2_support.set7')
     for arg in args:
         print ('another arg:', arg)
     sys.stdout.flush()
+    ChangeAValue(6)
 
 def set8(*args):
     print('PillaLeed_Main_2_support.set8')
     for arg in args:
         print ('another arg:', arg)
     sys.stdout.flush()
+    ChangeAValue(7)
 
 def set9(*args):
     print('PillaLeed_Main_2_support.set9')
     for arg in args:
         print ('another arg:', arg)
     sys.stdout.flush()
+    ChangeAValue(8)
 
 if __name__ == '__main__':
     PillaLeed_Main_2.start_up()
