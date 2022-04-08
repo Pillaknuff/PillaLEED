@@ -65,7 +65,8 @@ def main(*args):
     else: 
         camMode = 0
     # ***********Initialize the LEED***************************************************
-    com = 'com5'
+
+    com = 'com3'
     baud = '9600'
     myLEED = LEED_driver.myLEED(baud,com)
 
@@ -133,6 +134,7 @@ def updateGraphics(fig):
         a=1
 
 def BackgroundUpdate():
+    print('Starting background update')
     while running:
         time.sleep(1)
         attrdict, error = myLEED.getAllAttributes()
@@ -309,7 +311,7 @@ def cheese(*args):
     pictureData, error = myCamera.getHighResolution()
     
     if not error:
-        plt.imsave(cwdinfo['cwd'] + 'test.png', pictureData, cmap=plt.cm.jet)
+        plt.imsave(cwdinfo['cwd'] + cwdinfo['comments']+'.png', pictureData)#, cmap=plt.cm.jet)
 
     print(cwdinfo)
 

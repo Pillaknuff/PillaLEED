@@ -61,6 +61,7 @@ V6 0010 Wehnelt: 1.0V """
 
 class myLEED:
     def __init__(self,baud,com):
+        print('Initializing OCI LEED by PillaDriver')
         self.baud = baud
         self.com = com
 
@@ -101,7 +102,9 @@ class myLEED:
         return answer, error
 
     def getAllAttributes(self):
+        print('question to LEED!')
         answer, error = self.getFromDevice('VZ')
+        print('Asking something from OCI LEED ' + str(answer))
         answerdict = {}
         try:
             answer = answer.split(' ')
