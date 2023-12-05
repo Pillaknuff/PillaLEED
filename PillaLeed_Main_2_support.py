@@ -146,7 +146,7 @@ def updateGraphics(fig):                                                        
     elif camMode==0:
         a=1
 
-def BackgroundUpdate():                                                             # This will update all the LEED values in the live display
+def BackgroundUpdate():
     while running:
         time.sleep(1)
         attrdict, error = myLEED.getAllAttributes()
@@ -325,7 +325,7 @@ def cheese(*args):
     pictureData, error = myCamera.getHighResolution()
     
     if not error:
-        plt.imsave(cwdinfo['cwd'] + 'test.png', pictureData, cmap=plt.cm.jet)
+        plt.imsave(cwdinfo['cwd'] + cwdinfo['comments']+'.png', pictureData)#, cmap=plt.cm.jet)
 
     print(cwdinfo)
 
