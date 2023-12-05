@@ -1,4 +1,5 @@
 import cv2 
+import numpy as np
 
 class myCamera:
     def __init__(self,com):
@@ -9,8 +10,11 @@ class myCamera:
 
     
     def getGreyscale(self):
-        result,image = self.cam.read()
-        vid_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        try:
+            result,image = self.cam.read()
+            vid_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        except:
+            vid_gray = np.random.rand(100,100)
         return vid_gray
     
     def getHighResolution(self,tacq=1):

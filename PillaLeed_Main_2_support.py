@@ -5,31 +5,38 @@
 #  in conjunction with Tcl version 8.6
 #    Apr 05, 2022 04:38:46 PM CEST  platform: Windows NT
 #
-from pyexpat import error
-import sys
-import tkinter as tk
-import tkinter.ttk as ttk
-from tkinter.constants import *
-import time
-import threading
-from turtle import back
-import PillaLeed_Main_2
-import numpy as np
-from PIL import ImageTk, Image
-import OCI_driver as LEED_driver
-
+from pyexpat import error                       # something needed for the GUI builder
+import sys                                      # Library for the handling of anything concerning the system, savin files, ...
+import tkinter as tk                            # Tkinter is the Graphics library used for this program
+import tkinter.ttk as ttk                       # same same
+from tkinter.constants import *                 # same same
+import time                                     # Time is mainly used for timing, e.g. waiting
+import threading                                # multi threading library
+#from turtle import back                        # ??? no idea, why this is here
+import PillaLeed_Main_2                         # This is importing the actual main library
+import numpy as np                              # numerical python, handling of data arrays
+from PIL import ImageTk, Image                  # Used for embedding live images, e.g. the camera image
 from matplotlib.backends.backend_tkagg import (
-    FigureCanvasTkAgg, NavigationToolbar2Tk)
+    FigureCanvasTkAgg, NavigationToolbar2Tk)    # Used to embedd graphics and toolbars
 # Implement the default Matplotlib key bindings.
-from matplotlib.backend_bases import key_press_handler
-from matplotlib.figure import Figure
-from matplotlib import pyplot as plt
-import matplotlib.animation as animation
-import Spinnaker_driver as myCamlib
-from pathlib import Path
+from matplotlib.backend_bases import key_press_handler  # not used
+from matplotlib.figure import Figure            # not used
+from matplotlib import pyplot as plt            # Standard plotting function in Python
+import matplotlib.animation as animation        # Used to give live images
+from pathlib import Path                        # Can access paths
+#import Camera_Communication as myCamlib
 
+
+#**************************** Here we will import the self written drivers for the camera and the LEED, these should have a set of standartised funcitons, which will take care of e.g. acquiring photos and similar
+import OCI_driver as LEED_driver                # This is the self-written driver for the LEED
+import Camera_Communication as myCamlib             # Self written camera driver, the actual driver would be Spinnakter_driver
+
+
+#***************************************Settings**********************************************
+# The Directory in which pictures are saved
 saveDirectory = 'C:\\Users\\MBEcontrol\\Documents\\Measurements\\PillaLEED'
-
+LeedCom = 'com5'                                # com ports are the referer for the connecting USB port
+LEEDbaud = '9600'                               # communication rate of the com port
 
 def main(*args):
     '''Main entry point for the application.'''
@@ -41,6 +48,7 @@ def main(*args):
     _top1 = root
     _w1 = PillaLeed_Main_2.PillaLEED(_top1)
 
+    # Define a few arrays, which can be used to access or read all the GUI elements
     global allframes, ValueDisplayFields,ValueEntryFields, ValueLabels, colordict
     allframes = [_w1.CamFrame,_w1.RandomPicFrame,_w1.Profileframe,_w1.IVzoomframe,_w1.IVFrame]
     ValueEntryFields = [_w1.Valentry1,_w1.Valentry2,_w1.Valentry3,_w1.Valentry4,_w1.Valentry5,_w1.Valentry6,_w1.Valentry7,_w1.Valentry8,_w1.Valentry9,_w1.Valentry10,_w1.Valentry11,_w1.Valentry12]
@@ -55,42 +63,47 @@ def main(*args):
         'alarmred' : '#d70428',
     }
 
+    # Globals variables, in this case classes can be accessed outside of the function
     global myCamera, myLEED, running, LEEDOptions
     #************Initialize the Camera***************************************************
     global camMode # we define the cam Modes "whitenoise","live","static"
-    myCamera = myCamlib.myCamera(0)
+    try:
+        myCamera = myCamlib.myCamera(0)
+    except Exception as e:
+        print(e)
+        camMode = 0
     error = myCamera.connect()
     if not error:
         camMode = 1
     else: 
         camMode = 0
     # ***********Initialize the LEED***************************************************
-    com = 'com5'
-    baud = '9600'
+    com = LeedCom
+    baud = LEEDbaud
     myLEED = LEED_driver.myLEED(baud,com)
 
     LEEDOptions = myLEED.give_settings()
-    for i,key in enumerate(LEEDOptions.keys()):
-        ValueLabels[i].configure(text=key)
+    for i,key in enumerate(LEEDOptions.keys()):     # get settings from the LEED and put them into the respective labels
+        ValueLabels[i].configure(text=key)          # This is how you write into a label
 
-    # Other stuff
+    # Other stuff, used to show some standard picture
     initializenewrandompic()
     embeddGraphics()
     #Creat background update
-    running = True
-    backgroundtask = threading.Thread(target=BackgroundUpdate)
-    backgroundtask.start()
-    root.mainloop()
-    running=False
+    running = True                                  # running is a global variable which is used to terminate background tasks. Once this is stopped, als background tasks terminate
+    backgroundtask = threading.Thread(target=BackgroundUpdate)  # This is how you define a background task as a thread
+    backgroundtask.start()                          # this is how you start a thread
+    root.mainloop()                                 # This will start the GUI
+    running=False                                   # Neat trick: the root.mainloop funciton will run until you close the window, then the running goes to false and everything will terminate
 
 def OpenWorkingFile():
-    #open working file here
-    print('opening a working file')
+    #open working file here, this would be used ...I forgot
+    print('opening a working file when implemented')
 
-def getCWDinfo():
+def getCWDinfo():                                   # This function will get the username and sample to properly define the folder to save stuff
     user = _w1.Username.get()
     if user == '':
-        user = 'MusterCat'
+        user = 'MusterCat'                          # Use MusterCat, when no name is given
     sample = _w1.samplename.get()
     if sample == '':
         sample = 'Banana'
@@ -110,21 +123,21 @@ def embeddGraphics():                                                           
     fig = plt.figure(num=1,figsize=(1,1), dpi=100)
     if camMode==1:
         a = myCamera.getGreyscale() #
-    else:
+    else:                                                                           # Random noise, when the camera is not working, mainly for debugging reasons
         a = np.random.randint(0, 100, (256, 256))
     #subplot = fig.add_subplot(111)
     ax = plt.Axes(fig, [0., 0., 1., 1.])
     ax.set_axis_off()
     fig.add_axes(ax)
     ax.imshow(a)
-    canvas = FigureCanvasTkAgg(fig, master=_w1.CamFrame)  # A tk.DrawingArea. 
+    canvas = FigureCanvasTkAgg(fig, master=_w1.CamFrame)                            # A tk.DrawingArea. 
     canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
     canvas.draw()
-    ani = animation.FuncAnimation(fig, updateGraphics, interval=100)
+    ani = animation.FuncAnimation(fig, updateGraphics, interval=100)                # This will define an animation for the graphics we just created. It will always call the update function, which calls a new camera image and changes it
 
-def updateGraphics(fig):
+def updateGraphics(fig):                                                            # update function for the main camera window
     if camMode==1:
-        a = a = myCamera.getGreyscale()#np.random.randint(0, 100, (256, 256))
+        a = myCamera.getGreyscale()#np.random.randint(0, 100, (256, 256))
         ax.clear()
         ax.set_axis_off()
         ax.imshow(a)
@@ -132,7 +145,7 @@ def updateGraphics(fig):
     elif camMode==0:
         a=1
 
-def BackgroundUpdate():
+def BackgroundUpdate():                                                             # This will update all the LEED values in the live display
     while running:
         time.sleep(1)
         attrdict, error = myLEED.getAllAttributes()
@@ -148,7 +161,7 @@ def BackgroundUpdate():
 
         #print("aiaiaiai")
 
-def ChangeAValue(valno):
+def ChangeAValue(valno):                                                            # Function to change a value for the LEED. Should communicate with the LEED
     error = False
     if valno < len(LEEDOptions.keys()):
         valname = LEEDOptions.keys()[0]
@@ -167,7 +180,7 @@ def ChangeAValue(valno):
     
 
 
-def ChangeAStatus(what,whatto,color):
+def ChangeAStatus(what,whatto,color):                                       # Function to update the Status in the GUI
     if what=='LEED':
         widget = _w1.LEED_status
     elif what=='IV':
@@ -180,7 +193,7 @@ def ChangeAStatus(what,whatto,color):
         widget.configure(background=colordict['standardgrey'])
     widget.configure(text=whatto)
 
-def CamBackTolive(*args):
+def CamBackTolive(*args):                                                   # A button, which will switch the camera image from whatever is loaded to live
     print('PillaLeed_Main_2_support.CamBackTolive')
     for arg in args:
         print ('another arg:', arg)
@@ -188,6 +201,8 @@ def CamBackTolive(*args):
     global camMode
     camMode=1
 
+
+#***************************************************************** From here on only functions, which are not implemented yet*********************
 def DeleteMarks(*args):
     print('PillaLeed_Main_2_support.DeleteMarks')
     for arg in args:
